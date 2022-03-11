@@ -1,4 +1,4 @@
-const Sauce = require("../models/sauce");
+const sauce = require("../models/sauce");
 
 exports.createSauce = (req, res, next) => {
   const sauce = new sauce({
@@ -8,7 +8,7 @@ exports.createSauce = (req, res, next) => {
     price: req.body.price,
     userId: req.body.userId,
   });
-  Sauce
+  sauce
     .save()
     .then(() => {
       res.status(201).json({
@@ -31,7 +31,7 @@ exports.modifySauce = (req, res, next) => {
     price: req.body.price,
     userId: req.body.userId,
   });
-  Sauce
+  sauce
     .updateOne({ _id: req.params.id }, sauce)
     .then(() => {
       res.status(201).json({
@@ -45,22 +45,34 @@ exports.modifySauce = (req, res, next) => {
     });
 };
 exports.deleteSauce = (req, res, next) => {
-  Sauce
-    .deleteOne({ _id: req.params.id })
-    .then(() => {
-      res.status(200).json({
-        message: "Sauce deleted!",
+  sauce.findOne({ _id: req.params.id }).then((sauce) => {
+    if (!sauce) {
+      res.status(404).json({
+        error: new Error("No such Thing!"),
       });
-    })
-    .catch((error) => {
+    }
+    if (sauce.userId !== req.auth.userId) {
       res.status(400).json({
-        error: error,
+        error: new Error("Unauthorized request!"),
       });
-    });
+    }
+    sauce
+      .deleteOne({ _id: req.params.id })
+      .then(() => {
+        res.status(200).json({
+          message: "Deleted!",
+        });
+      })
+      .catch((error) => {
+        res.status(400).json({
+          error: error,
+        });
+      });
+  });
 };
 
 exports.getOneSauce = (req, res, next) => {
-  Sauce
+  sauce
     .findOne({
       _id: req.params.id,
     })
@@ -75,7 +87,7 @@ exports.getOneSauce = (req, res, next) => {
 };
 
 exports.getAllSauce = (req, res, next) => {
-  Sauce
+  sauce
     .find()
     .then((sauce) => {
       res.status(200).json(sauce);
