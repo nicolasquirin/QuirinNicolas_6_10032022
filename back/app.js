@@ -1,19 +1,25 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const path = require("path");
 
+const auth = require("./middleware/auth");
+
+//crash apres stuffRoutes
 const stuffRoutes = require("./routes/stuff");
 const userRoutes = require("./routes/user");
 
-const app = express();
+// CONNECTION MONGO DB
 
 mongoose
   .connect(
-    "mongodb+srv://nicolasquirin22:kigogoteca@cluster0.m0lms.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "mongodb+srv://nicolasquirin22:kigogoteca@cluster0.m0lms.mongodb.net/test",
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
+
+const app = express();
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -30,7 +36,10 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+app.use("/images", express.static(path.join(__dirname, "images")));
+
+app.use("/api/auth", userRoutes);
+
 app.use("/api/stuff", stuffRoutes);
-app.use("/api.auth", userRoutes);
 
 module.exports = app;

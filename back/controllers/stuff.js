@@ -1,100 +1,60 @@
-const sauce = require("../models/sauce");
+const Thing = require("../models/Thing");
+const fs = require("fs");
 
-exports.createSauce = (req, res, next) => {
-  const sauce = new sauce({
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-    price: req.body.price,
-    userId: req.body.userId,
+exports.createThing = (req, res, next) => {
+  const thingObject = JSON.parse(req.body.thing);
+  delete thingObject._id;
+  const thing = new Thing({
+    ...thingObject,
+    imageUrl: `${req.protocol}://${req.get("host")}/images/${
+      req.file.filename
+    }`,
   });
-  sauce
+  thing
     .save()
-    .then(() => {
-      res.status(201).json({
-        message: "Post saved successfully!",
-      });
-    })
-    .catch((error) => {
-      res.status(400).json({
-        error: error,
-      });
-    });
+    .then(() => res.status(201).json({ message: "Objet enregistré !" }))
+    .catch((error) => res.status(400).json({ error }));
 };
 
-exports.modifySauce = (req, res, next) => {
-  const sauce = new sauce({
-    _id: req.params.id,
-    title: req.body.title,
-    description: req.body.description,
-    imageUrl: req.body.imageUrl,
-    price: req.body.price,
-    userId: req.body.userId,
-  });
-  sauce
-    .updateOne({ _id: req.params.id }, sauce)
-    .then(() => {
-      res.status(201).json({
-        message: "sauce updated successfully!",
-      });
-    })
-    .catch((error) => {
-      res.status(400).json({
-        error: error,
-      });
-    });
-};
-exports.deleteSauce = (req, res, next) => {
-  sauce.findOne({ _id: req.params.id }).then((sauce) => {
-    if (!sauce) {
-      res.status(404).json({
-        error: new Error("No such Thing!"),
-      });
-    }
-    if (sauce.userId !== req.auth.userId) {
-      res.status(400).json({
-        error: new Error("Unauthorized request!"),
-      });
-    }
-    sauce
-      .deleteOne({ _id: req.params.id })
-      .then(() => {
-        res.status(200).json({
-          message: "Deleted!",
-        });
-      })
-      .catch((error) => {
-        res.status(400).json({
-          error: error,
-        });
-      });
-  });
+exports.modifyThing = (req, res, next) => {
+  const thingObject = req.file
+    ? {
+        ...JSON.parse(req.body.thing),
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${
+          req.file.filename
+        }`,
+      }
+    : { ...req.body };
+  Thing.updateOne(
+    { _id: req.params.id },
+    { ...thingObject, _id: req.params.id }
+  )
+    .then(() => res.status(200).json({ message: "Objet modifié !" }))
+    .catch((error) => res.status(400).json({ error }));
 };
 
-exports.getOneSauce = (req, res, next) => {
-  sauce
-    .findOne({
-      _id: req.params.id,
-    })
-    .then((sauce) => {
-      res.status(200).json(sauce);
-    })
-    .catch((error) => {
-      res.status(404).json({
-        error: error,
+// Supression de la photo ensuite supression de l'objet dans le callback
+exports.deleteThing = (req, res, next) => {
+  Thing.findOne({ _id: req.params.id })
+    .then((thing) => {
+      const filename = thing.imageUrl.split("/images/")[1];
+      fs.unlink(`images/${filename}`, () => {
+        Thing.deleteOne({ _id: req.params.id })
+          .then(() => res.status(200).json({ message: "Objet supprimé !" }))
+          .catch((error) => res.status(400).json({ error }));
       });
-    });
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
 
-exports.getAllSauce = (req, res, next) => {
-  sauce
-    .find()
-    .then((sauce) => {
-      res.status(200).json(sauce);
-    })
-    .catch((error) => {
-      res.status(400).json({
-        error: error,
-      });
-    });
+exports.getOneThing = (req, res, next) => {
+  Thing.findOne({ _id: req.params.id })
+    .then((thing) => res.status(200).json(thing))
+    .catch((error) => res.status(404).json({ error }));
+};
+
+exports.getAllThings = (req, res, next) => {
+  Thing.find()
+    .then((things) => res.status(200).json(things))
+    .catch((error) => res.status(400).json({ error }));
 };
