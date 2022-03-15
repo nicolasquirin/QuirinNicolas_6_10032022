@@ -2,18 +2,18 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
+require("dotenv").config();
 
-const auth = require("./middleware/auth");
 
 //crash apres stuffRoutes
-const stuffRoutes = require("./routes/stuff");
+const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
 // CONNECTION MONGO DB
 
 mongoose
   .connect(
-    "mongodb+srv://nicolasquirin22:kigogoteca@cluster0.m0lms.mongodb.net/test",
+    process.env.DB_KEY,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
@@ -40,6 +40,6 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use("/api/auth", userRoutes);
 
-app.use("/api/stuff", stuffRoutes);
+app.use("/api/sauces", sauceRoutes);
 
 module.exports = app;
