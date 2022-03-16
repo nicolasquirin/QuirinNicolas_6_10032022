@@ -7,7 +7,7 @@ const User = require("../models/User");
 exports.signup = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
-    .then((hash) => {
+    .then(hash => {
       const user = new User({
         email: req.body.email,
         password: hash,
