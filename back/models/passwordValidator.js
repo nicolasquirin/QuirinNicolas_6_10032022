@@ -13,12 +13,12 @@ PwSchema.is()
   .has()
   .lowercase() // Nombres de Lettre Minu
   .has()
-  .digits(1) // Nombre de chiffres
+  .digits(1) // Nombre de chiffres min
   .has()
   .not()
   .spaces() // Pas d'espace
   .is()
   .not()
-  .oneOf(["Passw0rd", "Password123"]); // Blacklist des valeurs decrite
+  .oneOf(["Passw0rd", "Password123", "123456789", "Azertyui"]); // Blacklist des valeurs decrite
 
 module.exports = PwSchema;
