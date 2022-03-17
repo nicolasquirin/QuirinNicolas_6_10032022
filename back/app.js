@@ -3,23 +3,36 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config();
-
-
-//crash apres stuffRoutes
 const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
-// CONNECTION MONGO DB
+//
+//SECURITY 
+//
 
+// assainit les entrées contre les attaques par injection
+const mongoSanitize = require("express-mongo-sanitize");
+
+// Définit quatre en-têtes, désactivant une grande partie de la mise en cache navigateur
+const nocache = require("nocache");
+
+// Configure de manière appropriée les en-têtes HTTP - Helmet version 4.6.0 / Au dela = (ERR_BLOCKED_BY_RESPONSE)
+const helmet = require("helmet");
+
+// Connection MongoDB
 mongoose
-  .connect(
-    process.env.DB_KEY,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(process.env.DB_KEY, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 const app = express();
+
+app.use(helmet());
+
+app.use(nocache());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -34,7 +47,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(mongoSanitize());
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
