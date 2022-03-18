@@ -7,10 +7,11 @@ const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
 //
-//SECURITY 
+//SECURITY
 //
 
-// assainit les entrées contre les attaques par injection
+// assainit les entrées contre les attaques par injection SQL
+const filter = require("content-filter");
 const mongoSanitize = require("express-mongo-sanitize");
 
 // Définit quatre en-têtes, désactivant une grande partie de la mise en cache navigateur
@@ -31,7 +32,6 @@ mongoose
 const app = express();
 
 app.use(helmet());
-
 app.use(nocache());
 
 app.use((req, res, next) => {
@@ -50,7 +50,12 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(mongoSanitize());
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+  })
+);
+app.use(filter()); // Block les $ et non les {
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
