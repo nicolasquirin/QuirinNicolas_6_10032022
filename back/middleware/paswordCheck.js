@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
       .status(400)
       .json({
         message:
-          "Pour votre sécurité le mot de passe doit contenir 8 caractères minimum avec une majuscule et un chiffre minimum",
+          "Pour votre sécurité le mot de passe doit contenir 8 caractères minimums avec une majuscule et un chiffre minimum",
       });
   } else {
     next();

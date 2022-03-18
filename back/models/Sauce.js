@@ -1,5 +1,7 @@
+// Utilisation Mongoose pour modéliser les données de Schema 
 const mongoose = require("mongoose");
 
+// Création des clés/valeurs au format attendu par l'aplication front-end
 const sauceSchema = mongoose.Schema({
   userId: { type: String, require: true },
   name: { type: String, required: true },

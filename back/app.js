@@ -7,7 +7,7 @@ const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
 //
-//SECURITY
+//SECURITY OWASP
 //
 
 // assainit les entrées contre les attaques par injection SQL
@@ -20,7 +20,7 @@ const nocache = require("nocache");
 // Configure de manière appropriée les en-têtes HTTP - Helmet version 4.6.0 / Au dela = (ERR_BLOCKED_BY_RESPONSE)
 const helmet = require("helmet");
 
-// Connection MongoDB
+// Connection a la base de donée MongoDB
 mongoose
   .connect(process.env.DB_KEY, {
     useNewUrlParser: true,
@@ -34,6 +34,7 @@ const app = express();
 app.use(helmet());
 app.use(nocache());
 
+// Middleware CORS - Accès Illimité afin de permettre à l'application d'accéder a L'API
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -50,12 +51,14 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.use(filter()); // Block les $ et non les {
+app.use(filter({ typeList: ["string"] }));
+app.use(filter({ typeList: ["object", "string"] }));
 app.use(
   mongoSanitize({
     replaceWith: "_",
   })
 );
-app.use(filter()); // Block les $ et non les {
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 

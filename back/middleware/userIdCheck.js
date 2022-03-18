@@ -12,10 +12,9 @@ module.exports = (req, res, next) => {
     const userId = decodedToken.userId;
 
     if(sauce.userId && sauce.userId !== userId) {
-      res.status(403).json({ message: "unauthorized request" });
-    } else {
-        next();
-    }
+      res.status(403).json({ message: "Requête non autorisée" });
+    } 
+      next();
   })
   .catch(error => {
       res.status(401).json({ error })
