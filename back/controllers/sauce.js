@@ -15,6 +15,7 @@ exports.createSauce = (req, res, next) => {
     .save()
     .then(() => res.status(201).json({ message: "Sauce enregistré !" }))
     .catch((error) => res.status(400).json({ error }));
+  console.log(req.body.sauce);
 };
 
 // Modification de la sauce par méthode PUT

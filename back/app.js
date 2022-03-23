@@ -14,7 +14,7 @@ const userRoutes = require("./routes/user");
 const filter = require("content-filter");
 const mongoSanitize = require("express-mongo-sanitize");
 
-// Définit quatre en-têtes, désactivant une grande partie de la mise en cache navigateur
+// Définit quatre en-têtes, désactivant une grande partie de la mise en cache navigateur côté client
 const nocache = require("nocache");
 
 // Configure de manière appropriée les en-têtes HTTP - Helmet version 4.6.0 / Au dela = (ERR_BLOCKED_BY_RESPONSE)
@@ -51,14 +51,17 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(filter()); // Block les $ et non les {
-app.use(filter({ typeList: ["string"] }));
-app.use(filter({ typeList: ["object", "string"] }));
 app.use(
   mongoSanitize({
     replaceWith: "_",
   })
 );
+let blackList = ["$", "{", "&&", "||"];
+let options = {
+  urlBlackList: blackList,
+  bodyBlackList: blackList,
+};
+app.use(filter(options));
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
